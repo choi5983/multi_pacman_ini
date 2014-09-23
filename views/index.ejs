@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type="text/javascript" src='socket.io/socket.io.js'></script>
+    <script type="text/javascript">
+    var io = io.connect();
+
+    $(document).ready(function(){
+
+	    var player = {
+	    	x: 5,
+	    	y: 5
+	    }
+
+	    io.emit('coord_info', {coordinate: player});
+	    io.on('info', function(data){
+	    	console.log('got info from the server', data);
+	    	drawWorld(data.world);
+	    	drawPacmans(data.players);
+	    })
+
+	    codes = {
+	    	2: 'block',
+	    	0: 'coin'
+	    }
+
+	    function drawWorld(world){
+	    	var content = '';
+	    	for(i in world)
+	    	{
+	    		content += '<div class="row">';
+	    		for(j in world[i])
+	    		{
+	    			content += '<div class="'+codes[world[i][j]]+'"></div>';
+	    		}
+	    		content += '</div>';
+	    	}
+	    	$('#blocks').html(content);
+	    }
+
+	    function drawPacmans(players){
+
+	    	var content = '';
+	    	for(i in players)
+	    	{
+	    		content += "<div class='pacman' style='top:"+(players[i].y*31)+"px; left:"+(players[i].x*31)+"px;'></div>";
+	    	}
+	    	$('#pacmans').html(content);
+
+	    }
+	    
+	    document.onkeydown = function(e){
+	    	if(e.keyCode == 37){
+	    		player.x--;
+	    	}
+	    	else if(e.keyCode == 39){
+	    		player.x++;
+	    	}
+	    	else if(e.keyCode == 40){
+	    		player.y++;
+	    	}
+	    	else if(e.keyCode == 38){
+	    		player.y--;
+	    	}
+
+	    	console.log(player);
+	    	io.emit('coord_info', {coordinate: player});
+	    }
+
+    });
+
+    </script>
+    <style type="text/css">
+    body{
+    	background-color: black;
+    	padding:0px;
+    }
+    .world{
+    	position:relative;
+    }
+    div.row div{
+    	display:inline-block;
+    	margin:0px;
+    	padding:0px;
+    }
+    .block{
+    	width:30px;
+    	height:30px;
+    	background-color:blue;
+    }
+    .coin{
+    	background-color:white;
+    	border-radius:15px;
+    	width:30px;
+    	height:30px;
+    }
+    .pacman{
+    	position:absolute;
+    	background: url('/images/pacman.gif');
+    	width:30px;
+    	height:30px;
+    	background-size: cover;
+    }
+
+    </style>
+  </head>
+  <body>
+   	
+  	<div class='world'>
+
+  		<div id='pacmans'>
+
+  			<div class='pacman' style='top:60px; left:90px;'></div>
+			<div class='pacman' style='top:90px; left:90px;'></div>
+			<div class='pacman' style='top:120px; left:90px;'></div>
+
+  		</div>
+  		<div id='blocks'></div>
+
+  	</div>
+
+  </body>
+</html>
